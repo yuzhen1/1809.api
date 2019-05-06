@@ -23,3 +23,6 @@ Route::get('/user/addUser','UserController@addUser');
 Route::get('/user/threePost','UserController@threePost');
 Route::get('/user/threePost2','UserController@threePost2');
 Route::get('/user/threePost3','UserController@threePost3');
+
+//请求中间件的方法
+Route::get('/user/mid','UserController@mid')->middleware('filter10');

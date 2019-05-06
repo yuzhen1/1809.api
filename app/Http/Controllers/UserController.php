@@ -72,6 +72,11 @@ class UserController extends Controller
         curl_close($ch);
     }
 
+    //请求中间件的测试方法
+    public function mid(){
+        echo "this is a way";
+    }
+
 
 
 
