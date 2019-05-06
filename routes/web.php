@@ -17,6 +17,9 @@ Route::get('/', function () {
 Route::get('/phpinfo', function () {
     return view('phpinfo');
 });
-//用户添加
-Route::get('/user/addUser/{user_id}','UserController@addUser');
-Route::post('/user/addUser/{user_id}','UserController@addUser');
+//
+Route::get('/user/addUser','UserController@addUser');
+//post提交方式
+Route::get('/user/threePost','UserController@threePost');
+Route::get('/user/threePost2','UserController@threePost2');
+Route::get('/user/threePost3','UserController@threePost3');
