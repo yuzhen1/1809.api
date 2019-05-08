@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\UserModel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Redis;
 
 class UserController extends Controller
 {
@@ -53,6 +56,7 @@ class UserController extends Controller
         print_r($output);
         curl_close($ch);
     }
+
     //curlpost方式传输application/x-www-form-urlencoded格式的数据
     public function threePost3(){
 //        初始化
@@ -77,8 +81,95 @@ class UserController extends Controller
         echo "this is a way";
     }
 
+    //注册
+    public function register(Request $request){
+        $password = $request->input('password');
+        $password2 = $request->input('password2');
+        $user_email = $request->input('user_email');
 
+        //验证密码
+        if($password!=$password2){
+            $response=[
+                'errno'=>50001,
+                'msg'=>'两次密码输入不一致'
+            ];
+            die(json_encode($response,JSON_UNESCAPED_UNICODE));
+        }
 
+        //验证邮箱
+        $u = UserModel::where(['user_email'=>$user_email])->first();
+        if($u){
+            $response=[
+                'errno'=>'50010',
+                'msg'=>'该邮箱已被注册'
+            ];
+            die(json_encode($response,JSON_UNESCAPED_UNICODE));
+        }
 
+        //密码加密
+        $password=password_hash($password,PASSWORD_BCRYPT);
+        $data = [
+            'user_name'=>$request->input('user_name'),
+            'user_email'=>$request->input('user_email'),
+            'password'=>$password,
+            'add_time'=>time(),
+        ];
+        //入库
+        UserModel::insertGetId($data);
+
+    }
+
+    //登录
+    public function login(Request $request){
+        $password = $request->input('password');
+        $user_email = $request->input('user_email');
+        //验证邮箱
+        $u = UserModel::where(['user_email'=>$user_email])->first();
+
+        if($u){
+            //存在  验证密码
+            if(password_verify($password,$u->password)){
+                $token = $this->getLoginToken($u->user_id);
+                $key = "login_token:user_id:".$u->user_id;
+                Redis::set($key,$token);
+//                $get = Redis::get($key);
+//                var_dump($get);die;
+                Redis::expire($key,604800);
+                //生成token
+                $response=[
+                    'errno'=>0,
+                    'msg'=>'ok',
+                    'data'=>[
+                        'token'=>$token
+                    ]
+                ];
+
+            }else{
+                //登录失败
+                $response=[
+                    'errno'=>50003,
+                    'msg'=>'密码不正确'
+                ];
+            }
+        }else{
+            $response=[
+                'errno'=>50002,
+                'msg'=>'该用户不存在'
+            ];
+        }
+        die(json_encode($response,JSON_UNESCAPED_UNICODE));
+    }
+
+    //获取登录token
+    public function getLoginToken($user_id){
+        $rand_str = Str::random(10);
+        $token = substr(md5($user_id.time().$rand_str),5,15);
+        return $token;
+    }
+
+    //个人中心
+    public function myCenter(){
+        echo __METHOD__;
+    }
 
 }

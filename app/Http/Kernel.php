@@ -2,6 +2,8 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\checkLogin;
+use App\Http\Middleware\checkLoginToken;
 use App\Http\Middleware\filter10;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
@@ -61,7 +63,9 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        'filter10'=>filter10::class
+        'filter10'=>filter10::class,
+        'checkLogin'=>checkLogin::class,
+        'checkLoginToken'=>checkLoginToken::class
     ];
 
     /**
